@@ -6,11 +6,11 @@ export const PHOTOS_ERROR = "PHOTOS_ERROR";
 
 export function getPhotos() {
   return function (dispatch) {
-    /*
+    
     dispatch({
       type: PHOTOS_REQUEST,
     });
-*/
+
     async function fetchMyAPI() {
       let response = await axios.get("https://graph.instagram.com/me/media", {
         params: {
@@ -30,11 +30,19 @@ export function getPhotos() {
           },
         }
       );
+      return data;
     }
     try {
-      fetchMyAPI();
+      const data = fetchMyAPI();
+      dispatch({
+        type: PHOTOS_SUCCESS,
+        payload: data,
+      });
     } catch (error) {
       console.log(error.response.status, error.response.data.error.message);
+      dispatch({
+        type: PHOTOS_ERROR,
+      });
     }
   };
 }
