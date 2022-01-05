@@ -9,32 +9,36 @@ export const PHOTOS_ERROR = "PHOTOS_ERROR";
 
 export function getPhotos() {
   return function (dispatch) {
+    async function fetchMyAPI() {
+      let responseUser = await axios.get(`${ENDPOINT}me/media`, {
+        params: {
+          access_token: `${TOKEN}`,
+        },
+      });
+      let userData = await responseUser.data.data;
+      let dataArray = [];
+      for (const i in userData) {
+        let responseData = await axios.get(`${ENDPOINT}` + userData[i].id, {
+          params: {
+            access_token: `${TOKEN}`,
+            fields: "id,media_type,media_url,username,timestamp",
+          },
+        });
+        dataArray.push(responseData.data);
+      }
+
+      dispatch({
+        type: PHOTOS_SUCCESS,
+        payload: dataArray,
+      });
+    }
+
     dispatch({
       type: PHOTOS_REQUEST,
     });
 
-    async function fetchMyAPI() {
-      let response = await axios.get(`${ENDPOINT}me/media`, {
-        params: {
-          access_token: `${TOKEN}`,
-        },
-      });
-      let userData = await response.data;
-      console.log(userData.data[0].id);
-      let data = await axios.get(`${ENDPOINT}` + userData.data[0].id, {
-        params: {
-          access_token: `${TOKEN}`,
-          fields: "id,media_type,media_url,username,timestamp",
-        },
-      });
-      return data;
-    }
     try {
       const data = fetchMyAPI();
-      dispatch({
-        type: PHOTOS_SUCCESS,
-        payload: data,
-      });
     } catch (error) {
       console.log(error.response.status, error.response.data.error.message);
       dispatch({
